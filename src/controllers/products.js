@@ -1,20 +1,33 @@
-// controller.js
 import { Router } from "express";
 import { listProducts, createProduct, deleteProduct, updateProduct } from "../services/products";
 
 const router = Router();
 
+const timeout = 30000; // 30 segundos
+
+// Função para envolver uma promise com um timeout
+function timeoutPromise(promise) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error('Tempo limite excedido'));
+        }, timeout);
+
+        promise.then(
+            (res) => {
+                clearTimeout(timer);
+                resolve(res);
+            },
+            (err) => {
+                clearTimeout(timer);
+                reject(err);
+            }
+        );
+    });
+}
+
 router.get('/', async (req, res) => {
     try {
-        const timeout = 10000; // 10 segundos
-        const productListPromise = listProducts();
-        const timeoutPromise = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                reject(new Error('Tempo limite excedido'));
-            }, timeout);
-        });
-
-        const productList = await Promise.race([productListPromise, timeoutPromise]);
+        const productList = await timeoutPromise(listProducts());
         res.json(productList);
     } catch (error) {
         console.error('Erro ao listar produtos:', error);
@@ -24,7 +37,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const product = await createProduct(req.body);
+        const product = await timeoutPromise(createProduct(req.body));
         res.status(201).json(product);
     } catch (error) {
         console.error('Erro ao criar produto:', error);
@@ -34,7 +47,7 @@ router.post('/', async (req, res) => {
 
 router.delete('/:productId', async (req, res) => {
     try {
-        await deleteProduct(req.params.productId);
+        await timeoutPromise(deleteProduct(req.params.productId));
         res.status(204).end();
     } catch (error) {
         console.error('Erro ao deletar produto:', error);
@@ -44,7 +57,7 @@ router.delete('/:productId', async (req, res) => {
 
 router.put('/:productId', async (req, res) => {
     try {
-        const updatedProduct = await updateProduct(req.params.productId, req.body);
+        const updatedProduct = await timeoutPromise(updateProduct(req.params.productId, req.body));
         res.json(updatedProduct);
     } catch (error) {
         console.error('Erro ao atualizar produto:', error);
