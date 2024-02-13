@@ -1,31 +1,46 @@
-import { Router } from "express"
+import { Router } from "express";
+import { listProducts, createProduct, deleteProduct, updateProduct } from "../services/products";
 
-import { listerProducts, createProduct, deleteProduct, updateProduct } from "../services/products"
-
-const router = Router()
+const router = Router();
 
 router.get('/', async (req, res) => {
-    const productList = await listerProducts()
-    res.send(productList)
-})
+    try {
+        const productList = await listProducts();
+        res.json(productList);
+    } catch (error) {
+        console.error('Erro ao listar produtos:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
 
 router.post('/', async (req, res) => {
     try {
-        const product = await createProduct(req.body)
-        res.status(201).send(product)
-    } catch (err) {
-        res.status(400).send()
+        const product = await createProduct(req.body);
+        res.status(201).json(product);
+    } catch (error) {
+        console.error('Erro ao criar produto:', error);
+        res.status(400).json({ error: 'Requisição inválida' });
     }
-})
+});
 
 router.delete('/:productId', async (req, res) => {
-    await deleteProduct(req.params.productId)
-    res.send('delete')
-})
+    try {
+        await deleteProduct(req.params.productId);
+        res.status(204).end();
+    } catch (error) {
+        console.error('Erro ao deletar produto:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
 
 router.put('/:productId', async (req, res) => {
-    await updateProduct(req.params.productId, req.body)
-    res.send('update')
-})
+    try {
+        const updatedProduct = await updateProduct(req.params.productId, req.body);
+        res.json(updatedProduct);
+    } catch (error) {
+        console.error('Erro ao atualizar produto:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
 
-export default router
+export default router;

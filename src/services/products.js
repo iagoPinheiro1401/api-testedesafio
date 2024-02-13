@@ -1,31 +1,21 @@
-import databaseConnection from "../utils/database"
-import Product from "../models/products"
+import databaseConnection from "../utils/database";
+import Product from "../models/products";
 
-export const listerProducts = async () => {
-    await databaseConnection()
-    const products = await Product.find()
-    return products
-}
+// Mantém a conexão com o banco de dados aberta durante toda a vida útil da aplicação
+databaseConnection();
 
-export const createProduct = async (product) => {
-    await databaseConnection()
-    const createdProduct = await Product.create(product)
-    return createdProduct
-}
+export const listProducts = async () => {
+    return await Product.find();
+};
 
-export const deleteProduct = async (id) => {
-    await databaseConnection()
-    await Product.findByIdAndDelete(id)
-}
+export const createProduct = async (productData) => {
+    return await Product.create(productData);
+};
 
-export const updateProduct = async (id, newBody) => {
-    await databaseConnection()
-    try {
-      const updatedProduct = await Product.findByIdAndUpdate(id, newBody, { new: true })
-      return updatedProduct
-    } catch (error) {
-      console.error('Erro ao atualizar a nota:', error)
-      throw error
-    }
-  }
-  
+export const deleteProduct = async (productId) => {
+    await Product.findByIdAndDelete(productId);
+};
+
+export const updateProduct = async (productId, updatedData) => {
+    return await Product.findByIdAndUpdate(productId, updatedData, { new: true });
+};
