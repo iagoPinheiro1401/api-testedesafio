@@ -1,11 +1,12 @@
+// service.js
 import databaseConnection from "../utils/database";
 import Product from "../models/products";
 
 // Mantém a conexão com o banco de dados aberta durante toda a vida útil da aplicação
-databaseConnection();
+const db = databaseConnection();
 
 export const listProducts = async () => {
-    return await Product.find();
+    return await Product.find().lean().timeout(10000); 
 };
 
 export const createProduct = async (productData) => {
