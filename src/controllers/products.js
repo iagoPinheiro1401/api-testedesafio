@@ -1,3 +1,4 @@
+// controller.js
 import { Router } from "express";
 import { listProducts, createProduct, deleteProduct, updateProduct } from "../services/products";
 
@@ -5,7 +6,15 @@ const router = Router();
 
 router.get('/', async (req, res) => {
     try {
-        const productList = await listProducts();
+        const timeout = 10000; // 10 segundos
+        const productListPromise = listProducts();
+        const timeoutPromise = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(new Error('Tempo limite excedido'));
+            }, timeout);
+        });
+
+        const productList = await Promise.race([productListPromise, timeoutPromise]);
         res.json(productList);
     } catch (error) {
         console.error('Erro ao listar produtos:', error);

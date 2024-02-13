@@ -6,7 +6,7 @@ import Product from "../models/products";
 const db = databaseConnection();
 
 export const listProducts = async () => {
-    return await Product.find().lean().timeout(10000); 
+    return await Product.find().lean(); 
 };
 
 export const createProduct = async (productData) => {
